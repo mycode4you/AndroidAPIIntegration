@@ -1,0 +1,97 @@
+package com.kishorramani.logictask;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.Toast;
+
+import com.kishorramani.logictask.databinding.ActivityBoxBinding;
+import com.kishorramani.logictask.databinding.ActivityMainBinding;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+public class BoxActivity extends AppCompatActivity {
+    private static final String TAG = "BoxActivity";
+    private ActivityBoxBinding binding;
+
+    private ArrayList<Integer> numberList = new ArrayList<>();
+    private ArrayList<CheckBox> checkBoxes = new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityBoxBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        initViews();
+    }
+
+    private void initViews() {
+        getBundleData();
+    }
+
+    private void getBundleData() {
+        Intent intent = getIntent();
+        int number = intent.getIntExtra("number", 0);
+
+        for (int i = 0; i < number; i++) {
+            numberList.add(i);
+        }
+
+        CheckBox cb = null;
+        Random rand = new Random();
+        int randomElement = numberList.get(rand.nextInt(numberList.size()));
+
+        for (int i = 0; i < number; i++) {
+            cb = new CheckBox(getApplicationContext());
+            cb.setWidth(50);
+            cb.setHeight(50);
+            cb.setTextColor(Color.BLACK);
+            cb.setText(String.valueOf(i));
+            cb.setTag(i);
+            checkBoxes.add(cb);
+            binding.containerForCheckBox.addView(cb);
+            cb.setEnabled(false);
+
+            if (randomElement == i) {
+                cb.setTextColor(Color.RED);
+                cb.setEnabled(true);
+            }
+
+            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    int tag = Integer.parseInt(compoundButton.getTag().toString());
+                    compoundButton.setTextColor(Color.BLUE);
+                    compoundButton.setEnabled(false);
+
+                    if (!numberList.isEmpty() && numberList.contains(tag)) {
+                        numberList.remove(Integer.valueOf(tag));
+                        setRandomCheckBoxToRed(numberList);
+                    }
+                }
+
+                private void setRandomCheckBoxToRed(ArrayList<Integer> numberList) {
+                    if (numberList.size() > 0) {
+                        int randomElement = numberList.get(rand.nextInt(numberList.size()));
+                        for (int i = 0; i < checkBoxes.size(); i++) {
+                            int tag = Integer.parseInt(checkBoxes.get(i).getTag().toString());
+                            if (tag == randomElement) {
+                                checkBoxes.get(i).setTextColor(Color.RED);
+                                checkBoxes.get(i).setEnabled(true);
+                            }
+                        }
+                    } else {
+                        Toast.makeText(BoxActivity.this, "Finish", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+}
